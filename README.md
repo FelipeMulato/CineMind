@@ -53,7 +53,7 @@ A plataforma oferece um questionário para avaliar o perfil do usuário e, com b
 
 - **Preferências de Gênero**
 
-  - Os usuários podem selecionar seus gêneros de filmes favoritos para refinar ainda mais as recomendações.
+  - Os usuários podem selecionar seus gêneros de filmes favoritos para refinar as recomendações.
 
 - **Documentação da API**
 
