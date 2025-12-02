@@ -34,7 +34,7 @@ jobs:
           python -m pip install pipenv
           python -m pipenv install --system --deploy --dev
 
-      - name: Install test dependencies (pytest + coverage)
+      - name: Install test dependencies
         working-directory: ./backend
         run: |
           pip install pytest pytest-cov
@@ -49,7 +49,11 @@ jobs:
           pytest --cov=. --cov-report xml
 
       - name: Debug coverage file
-        run: ls -lh backend/coverage.xml
+        run: |
+          echo "ROOT DIRECTORY:"
+          ls -lah .
+          echo "BACKEND DIRECTORY:"
+          ls -lah backend
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@d0dc39c2c2c7aa90d8f564ba8a57df0c5f40c2a7
