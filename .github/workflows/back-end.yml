@@ -34,6 +34,11 @@ jobs:
           python -m pip install pipenv
           python -m pipenv install --system --deploy --dev
 
+      - name: Install test dependencies (pytest + coverage)
+        working-directory: ./backend
+        run: |
+          pip install pytest pytest-cov
+
       - name: Linting
         working-directory: ./backend
         run: python -m ruff check --output-format github --ignore E402,F401,F403,F405
@@ -42,6 +47,9 @@ jobs:
         working-directory: ./backend
         run: |
           pytest --cov=. --cov-report xml
+
+      - name: Debug coverage file
+        run: ls -lh backend/coverage.xml
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@d0dc39c2c2c7aa90d8f564ba8a57df0c5f40c2a7
