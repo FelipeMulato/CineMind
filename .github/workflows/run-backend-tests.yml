@@ -1,0 +1,59 @@
+name: CI - Django Tests
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DJANGO_SETTINGS_MODULE: cinemind.settings
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+      SECRET_KEY: testkey
+      ENVIRONMENT: test
+      TMDB_API_KEY: fake-key
+      ACTIVE_LLM_PROVIDER: gemini
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pipenv install --dev --deploy --ignore-pipfile
+
+      - name: Run migrations
+        run: |
+          cd backend/src
+          pipenv run python manage.py migrate
+
+      - name: Run tests
+        run: |
+          cd backend/src
+          pipenv run pytest -q --tb=short --disable-warnings

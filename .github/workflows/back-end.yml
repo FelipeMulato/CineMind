@@ -1,0 +1,62 @@
+name: CI Pipeline (back-end)
+
+on:
+  push:
+    paths:
+      - backend/**
+    branches:
+      - dev
+
+  pull_request:
+    paths:
+      - backend/**
+    branches:
+      - dev
+
+jobs:
+  test-backend:
+    name: Testar back-end
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout @ CineMind
+        uses: actions/checkout@v5
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.11
+
+      - name: Building
+        working-directory: ./backend
+        run: |
+          cat .env.example > .env
+          python -m pip install pipenv
+          python -m pipenv install --system --deploy --dev
+
+      - name: Install test dependencies
+        working-directory: ./backend
+        run: |
+          pip install pytest pytest-cov
+
+      - name: Linting
+        working-directory: ./backend
+        run: python -m ruff check --output-format github --ignore E402,F401,F403,F405
+
+      - name: Testing (with coverage)
+        working-directory: ./backend
+        run: |
+          pytest --cov=. --cov-report xml
+
+      - name: Debug coverage file
+        run: |
+          echo "ROOT DIRECTORY:"
+          ls -lah .
+          echo "BACKEND DIRECTORY:"
+          ls -lah backend
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@d0dc39c2c2c7aa90d8f564ba8a57df0c5f40c2a7
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
